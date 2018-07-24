@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>刮刮乐</title>
+    <style>
+        body {
+            background-color: #eee;
+        }
+
+        .canvasBox {
+            width: 400px;
+            height: 200px;
+            margin: 100px auto;
+        }
+
+        #canvas1 {
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 300px 180px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="canvasBox">
+        <canvas width="400" height=200 id="canvas1"></canvas>
+    </div>
+    <script>
+        var oCanvas = document.getElementById('canvas1');
+        var ctx = oCanvas.getContext('2d');
+        var w = oCanvas.width;
+        var h = oCanvas.height;
+        var lastPoint = {};
+        var nowPoint = {};
+        var lastPointX, lastPointY;
+        var nowPointX, nowPointY;
+
+        function init() {
+            ctx.fillStyle = '#ccc';
+            ctx.fillRect(0, 0, w, h);
+            var r = Math.random(),
+                oImg = new Image();
+
+            if (r < 0.5) {
+                oImg.src = './1.png';
+            } else {
+                oImg.src = './2.jpg';
+            }
+            oImg.onload = function () {
+                oCanvas.style.backgroundImage = 'url(' + oImg.src + ')';
+                ctx.globalCompositeOperation = 'destination-out';
+                document.addEventListener('mousedown', downFun, false);
+            }
+        }
+        init();
+
+        function downFun(e) {
+            lastPointX = e.clientX - oCanvas.offsetLeft;
+            lastPointY = e.clientY - oCanvas.offsetTop;
+            oCanvas.addEventListener('mousemove', moveFun, false);
+            document.addEventListener('mouseup', upFun, false);
+        }
+
+        function moveFun(e) {
+            nowPointX = e.clientX - oCanvas.offsetLeft;
+            nowPointY = e.clientY - oCanvas.offsetTop;
+
+            ctx.beginPath();
+            ctx.fillStyle = 'transpatent';
+
+            ctx.lineWidth = 20;
+            ctx.moveTo(lastPointX, lastPointY);
+            ctx.lineTo(nowPointX, nowPointY);
+            ctx.stroke();
+
+            ctx.arc(nowPointX, nowPointY, 10, 0, Math.PI * 2, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            lastPointX = nowPointX;
+            lastPointY = nowPointY;
+        }
+
+        function upFun() {
+            oCanvas.removeEventListener('mousemove', moveFun, false);
+            document.removeEventListener('mouseup', upFun, false);
+            clearAll();
+        }
+
+        function clearAll() {
+            var d = ctx.getImageData(0, 0, w, h),
+                c = 0,
+                len = d.data.length;
+            for (var i = 0; i < len; i += 4) {
+                if (d.data[i] === 0) {
+                    c++;
+                }
+            }
+            if (c > w * h * 0.6) {
+                ctx.clearRect(0, 0, w, h);
+            }
+        }
+    </script>
+</body>
+
+</html>
